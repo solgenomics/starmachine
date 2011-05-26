@@ -5,6 +5,10 @@ use FindBin '$Bin';
 use File::Basename;
 use File::Spec::Functions;
 
+# use (core-only) perl to do validation and setup of environment
+# variables and params, then drop into shell script for the init.d
+# running
+
 my $starmachine_root = $ENV{STARMACHINE_ROOT} || $FindBin::RealBin;
 my $app = basename $0;
 my $app_dir = catdir( $starmachine_root, $app );
@@ -17,13 +21,11 @@ my $port = 8200;
 my $user  = 'www-data';
 my $group = 'www-data';
 
-# use (core-only) perl to do validation and setup of environment
-# variables and params
 my $workers = 5;
 my $timeout = 20;
 
-my $pid_file    = "../$app.pid";
-my $status_file = "../$app.status";
+my $pid_file    = catfile( $starmachine_root, "$app.pid"    );
+my $status_file = catfile( $starmachine_root, "$app.status" );
 my $psgi_file   = "script/$app.psgi";
 
 %ENV = (
