@@ -15,14 +15,15 @@ my $app_dir = catdir( $starmachine_root, $app );
 -e $app_dir or die "app dir $app_dir does not exist, aborting.\n";
 chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 
-my $port = 8200;
-#my $user  = 'rob';
-#my $group = 'rob';
-my $user  = 'www-data';
-my $group = 'www-data';
-
-my $workers = 5;
-my $timeout = 20;
+my %conf = (
+    port    => 8200,
+    user    => 'www-data',
+    group   => 'www-data',
+    workers => 5,
+    timeout => 20,
+    preload => 1,
+);
+$conf{preload_app} = $conf{preload_app} ? '--preload-app' : '';
 
 my $pid_file    = catfile( $starmachine_root, "$app.pid"    );
 my $status_file = catfile( $starmachine_root, "$app.status" );
@@ -35,9 +36,9 @@ my $psgi_file   = "script/$app.psgi";
     PERL5LIB => 'lib:extlib/lib/perl5',
     PIDFILE  => $pid_file,
     PERL_EXEC => "$^X -Mlocal::lib=extlib",
-    SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$port --status-file=$status_file",
+    SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file",
     PSGI_FILE => $psgi_file,
-    STARMAN => "extlib/bin/starman --user $user --group $group --workers $workers --timeout $timeout --preload-app $psgi_file",
+    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} $conf{preload_app} $psgi_file",
    );
 
 # now drop into sh to do the startup-scripty stuff
