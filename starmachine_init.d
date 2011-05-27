@@ -106,25 +106,16 @@ check_running() {
     [ -s $PIDFILE ] && kill -0 $(cat $PIDFILE) >/dev/null 2>&1
 }
 
-check_compile() {
-  if ( cd $APPDIR ; $PERL_EXEC -c $PSGI_FILE ) ; then
-    return 1
-  else
-    return 0
-  fi
-}
-
 _start() {
 
   $PERL_EXEC $SERVER_STARTER -- $STARMAN &
 
-  echo ""
-  echo "Waiting for $APP to start..."
+  #echo "Waiting for $APP to start..."
 
   for i in 1 2 3 4 ; do
     sleep 1
     if check_running ; then
-      echo "$APP is now starting up"
+      #echo "$APP is now starting up"
       return 0
     fi
   done
@@ -134,7 +125,6 @@ _start() {
 
 start() {
     log_daemon_msg "Starting $APP";
-    echo ""
 
     if check_running; then
         log_progress_msg "already running"
@@ -157,7 +147,6 @@ _stop() {
 }
 stop() {
     log_daemon_msg "Stopping $APP";
-    echo ""
     _stop;
     log_end_msg $?
     return $?
@@ -177,13 +166,7 @@ reload() {
 restart() {
     log_daemon_msg "Restarting $APP";
 
-    if check_compile ; then
-        log_failure_msg "Compile error; not restarting.";
-        log_end_msg 1;
-        exit 1;
-    fi
-
-    stop
+    _stop
     _start
     log_end_msg $?
     return $?
