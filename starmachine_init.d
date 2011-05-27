@@ -78,6 +78,7 @@ my %conf = (
     psgi_file           => "script/$app.psgi",
     pid_file            => catfile( $starmachine_root, "$app.pid"    ),
     status_file         => catfile( $starmachine_root, "$app.status" ),
+    extlib              => 'extlib',
 
     % {$all_conf->{$app} || {} },
 );
@@ -88,23 +89,30 @@ my $app_dir     = $conf{app_dir};
 my $pid_file    = $conf{pid_file};
 my $status_file = $conf{status_file};
 my $psgi_file   = $conf{psgi_file};
+my $extlib      = $conf{extlib};
 
 -e $app_dir or die "app dir $app_dir does not exist, aborting.\n";
 chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
+
+my $have_extlib = -d $extlib;
 
 %ENV = (
     %ENV,
     APP  => $app,
     APPDIR   => $app_dir,
-    PERL5LIB => 'lib:extlib/lib/perl5',
+    PERL5LIB => 'lib'.($have_extlib ? ":$extlib/lib/perl5" : '').":$ENV{PERL5LIB}",
     PIDFILE  => $pid_file,
-    PERL_EXEC => "$^X -Mlocal::lib=extlib",
-    SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}",
+    PERL_EXEC => "$^X".($have_extlib ? " -Mlocal::lib=$extlib" : ''),
+    PATH  => ( $have_extlib ? "$extlib/bin:$ENV{PATH}" : $ENV{PATH} ),
     PSGI_FILE => $psgi_file,
-    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} --access-log $conf{access_log} $conf{preload_app} $conf{starman_args} $psgi_file",
+    STARMAN => "starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} --access-log $conf{access_log} $conf{preload_app} $conf{starman_args} $psgi_file",
     ERROR_LOG => $conf{error_log},
     ACCESS_LOG => $conf{access_log},
    );
+
+my $start_server = eval { require IPC::Cmd; IPC::Cmd::can_run('start_server') } || `which start_server` || 'start_server';
+$ENV{SERVER_STARTER} = "$start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}";
+
 
 # now drop into sh to do the startup-scripty stuff
 open( STDIN, '<&DATA' ) or die;
