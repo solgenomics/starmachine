@@ -133,7 +133,7 @@ _start() {
 }
 
 start() {
-    log_daemon_msg "Starting $APP" $STARTUP_OPTS
+    log_daemon_msg "Starting $APP";
     echo ""
 
     if check_running; then
@@ -156,7 +156,7 @@ _stop() {
     fi
 }
 stop() {
-    log_daemon_msg "Stopping $APP" $STARTUP_OPTS
+    log_daemon_msg "Stopping $APP";
     echo ""
     _stop;
     log_end_msg $?
@@ -165,7 +165,7 @@ stop() {
 
 reload() {
     if [ -e $PIDFILE ]; then
-       log_daemon_msg "Gracefully reloading $APP" $STARTUP_OPTS;
+       log_daemon_msg "Gracefully reloading $APP";
         $PERL_EXEC $SERVER_STARTER --restart;
        log_end_msg $?;
     else
@@ -175,7 +175,7 @@ reload() {
 }
 
 restart() {
-    log_daemon_msg "Restarting $APP" $STARTUP_OPTS;
+    log_daemon_msg "Restarting $APP";
 
     if check_compile ; then
         log_failure_msg "Compile error; not restarting.";
