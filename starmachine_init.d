@@ -1,28 +1,80 @@
 #!/usr/bin/env perl
 use strict;
-use warnings;
+#use warnings;
+use Carp;
 use FindBin '$Bin';
 use File::Basename;
 use File::Spec::Functions;
+use IO::File;
 
+# from Config::File
+sub read_config_file($) {
+    my ($conf, $file, $fh, $line_num);
+    $file = shift;
+    $fh = IO::File->new($file, 'r') or
+        croak "Can't read configuration in $file: $!\n";
+
+    while (++$line_num and my $line = $fh->getline) {
+        my ($orig_line, $conf_ele, $conf_data);
+        chomp $line;
+	$orig_line = $line;
+
+        next if $line =~ m/^\s*#/;
+        $line =~ s/(?<!\\)#.*$//;
+        $line =~ s/\\#/#/g;
+        next if $line =~ m/^\s*$/;
+        $line =~ s{\$(\w+)}{
+            exists($conf->{$1}) ? $conf->{$1} : "\$$1"
+            }gsex;
+
+	unless ($line =~ m/\s*([^\s=]+)\s*=\s*(.*?)\s*$/) {
+	    warn "Line format invalid at line $line_num: '$orig_line'";
+	    next;
+	}
+
+        ($conf_ele, $conf_data) = ($1, $2);
+        unless ($conf_ele =~ /^[\]\[A-Za-z0-9_-]+$/) {
+            warn "Invalid characters in key $conf_ele at line $line_num" .
+		" - Ignoring";
+            next;
+        }
+        $conf_ele = '$conf->{' . join("}->{", split /[][]+/, $conf_ele) . "}";
+        $conf_data =~ s!([\\\'])!\\$1!g;
+        eval "$conf_ele = '$conf_data'";
+    }
+    $fh->close;
+
+    return $conf;
+}
+
+#############################
 # use (core-only) perl to do validation and setup of environment
 # variables and params, then drop into shell script for the init.d
 # running
 
 my $starmachine_root = $ENV{STARMACHINE_ROOT} || $FindBin::RealBin;
+my ( $conf_file ) = grep -r, $ENV{STARMACHINE_CONF}, catfile( $starmachine_root, 'starmachine.conf' ), '/etc/starmachine.conf';
+$conf_file or die "conf file not found, or not readable.\n";
+my $all_conf = read_config_file( $conf_file );
+
 my $app = basename $0;
 my $app_dir = catdir( $starmachine_root, $app );
 -e $app_dir or die "app dir $app_dir does not exist, aborting.\n";
 chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 
 my %conf = (
-    port    => 8200,
-    user    => 'www-data',
-    group   => 'www-data',
-    workers => 5,
-    timeout => 20,
-    preload => 1,
+    #defaults
+    port                => 8200,
+    user                => 'www-data',
+    workers             => 10,
+    timeout             => 20,
+    preload_app         => 1,
+    server_starter_args => '',
+    starman_args        => '',
+
+    % {$all_conf->{$app} || {} },
 );
+$conf{group} ||= $conf{user};
 $conf{preload_app} = $conf{preload_app} ? '--preload-app' : '';
 
 my $pid_file    = catfile( $starmachine_root, "$app.pid"    );
@@ -36,9 +88,9 @@ my $psgi_file   = "script/$app.psgi";
     PERL5LIB => 'lib:extlib/lib/perl5',
     PIDFILE  => $pid_file,
     PERL_EXEC => "$^X -Mlocal::lib=extlib",
-    SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file",
+    SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}",
     PSGI_FILE => $psgi_file,
-    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} $conf{preload_app} $psgi_file",
+    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} $conf{preload_app} $conf{starman_args} $psgi_file",
    );
 
 # now drop into sh to do the startup-scripty stuff
