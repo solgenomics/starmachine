@@ -53,14 +53,15 @@ sub read_config_file($) {
 # running
 
 my $starmachine_root = $ENV{STARMACHINE_ROOT} || $FindBin::RealBin;
-my ( $conf_file ) = grep -r, $ENV{STARMACHINE_CONF}, catfile( $starmachine_root, 'starmachine.conf' ), '/etc/starmachine.conf';
+my ( $conf_file ) = grep -r, (
+    $ENV{STARMACHINE_CONF},
+    catfile( $starmachine_root, 'starmachine.conf' ),
+    '/etc/starmachine.conf',
+  );
 $conf_file or die "conf file not found, or not readable.\n";
 my $all_conf = read_config_file( $conf_file );
 
 my $app = basename $0;
-my $app_dir = catdir( $starmachine_root, $app );
--e $app_dir or die "app dir $app_dir does not exist, aborting.\n";
-chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 
 my %conf = (
     #defaults
@@ -73,15 +74,23 @@ my %conf = (
     starman_args        => '',
     access_log          => catfile( $starmachine_root, "$app.access.log" ),
     error_log           => catfile( $starmachine_root, "$app.error.log"  ),
+    app_dir             => catdir( $starmachine_root, $app ),
+    psgi_file           => "script/$app.psgi",
+    pid_file            => catfile( $starmachine_root, "$app.pid"    ),
+    status_file         => catfile( $starmachine_root, "$app.status" ),
 
     % {$all_conf->{$app} || {} },
 );
 $conf{group} ||= $conf{user};
 $conf{preload_app} = $conf{preload_app} ? '--preload-app' : '';
 
-my $pid_file    = catfile( $starmachine_root, "$app.pid"    );
-my $status_file = catfile( $starmachine_root, "$app.status" );
-my $psgi_file   = "script/$app.psgi";
+my $app_dir     = $conf{app_dir};
+my $pid_file    = $conf{pid_file};
+my $status_file = $conf{status_file};
+my $psgi_file   = $conf{psgi_file};
+
+-e $app_dir or die "app dir $app_dir does not exist, aborting.\n";
+chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 
 %ENV = (
     %ENV,
