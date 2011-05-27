@@ -146,7 +146,16 @@ start() {
 _stop() {
     if [ -e $PIDFILE ]; then
         kill `cat $PIDFILE`;
-        sleep 3;
+        for i in 1 2 3 4 5 6 7; do
+            sleep 1;
+            if check_running ; then
+                #echo "$APP is now starting up"
+                return 0
+            fi
+        done
+        if check_running ; then
+            return 1;
+        fi
     fi
 }
 stop() {
