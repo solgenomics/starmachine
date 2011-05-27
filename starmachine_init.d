@@ -58,15 +58,15 @@ my ( $conf_file ) = grep -r, (
     catfile( $starmachine_root, 'starmachine.conf' ),
     '/etc/starmachine.conf',
   );
-$conf_file or die "conf file not found, or not readable.\n";
-my $all_conf = read_config_file( $conf_file );
+my $all_conf = $conf_file ? read_config_file( $conf_file ) : {};
 
 my $app = basename $0;
 
 my %conf = (
     #defaults
     port                => 8080,
-    user                => 'www-data',
+    user                => $<,
+    group               => ( split /\s+/, $( )[0],
     workers             => 10,
     timeout             => 20,
     preload_app         => 1,
@@ -110,7 +110,8 @@ chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 open( STDIN, '<&DATA' ) or die;
 exec '/bin/sh', '-s', @ARGV;
 __DATA__
-# based on site-init.sh script by Mischa Spiegelmock at
+
+# based loosely on site-init.sh script by Mischa Spiegelmock at
 # http://wiki.catalystframework.org/wiki/deployment/perlbal-starman-psgi
 
 . /lib/lsb/init-functions
