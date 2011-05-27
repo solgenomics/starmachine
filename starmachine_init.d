@@ -64,7 +64,7 @@ chdir $app_dir or die "cannot chdir to $app_dir, aborting.\n";
 
 my %conf = (
     #defaults
-    port                => 8200,
+    port                => 8080,
     user                => 'www-data',
     workers             => 10,
     timeout             => 20,
