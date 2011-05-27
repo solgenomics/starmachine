@@ -42,7 +42,7 @@ my $psgi_file   = "script/$app.psgi";
    );
 
 # now drop into sh to do the startup-scripty stuff
-open( STDIN, '+>&DATA' ) or die;
+open( STDIN, '<&DATA' ) or die;
 exec '/bin/sh', '-s', @ARGV;
 __DATA__
 # based on site-init.sh script by Mischa Spiegelmock at
