@@ -6,7 +6,7 @@ Starman.
 
 ## Most basic setup - single app
 
-    git clone https://rbuels@github.com/solgenomics/starmachine.git
+    git clone git://github.com/solgenomics/starmachine.git
     cd starmachine;
     ln -s /path/to/myapp .;
     sudo ln -s $PWD/starmachine_init.d /etc/init.d/myapp;
