@@ -71,6 +71,8 @@ my %conf = (
     preload_app         => 1,
     server_starter_args => '',
     starman_args        => '',
+    access_log          => catfile( $starmachine_root, "$app.access.log" ),
+    error_log           => catfile( $starmachine_root, "$app.error.log"  ),
 
     % {$all_conf->{$app} || {} },
 );
@@ -90,7 +92,9 @@ my $psgi_file   = "script/$app.psgi";
     PERL_EXEC => "$^X -Mlocal::lib=extlib",
     SERVER_STARTER => "extlib/bin/start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}",
     PSGI_FILE => $psgi_file,
-    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} $conf{preload_app} $conf{starman_args} $psgi_file",
+    STARMAN => "extlib/bin/starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} --access-log $conf{access_log} $conf{preload_app} $conf{starman_args} $psgi_file",
+    ERROR_LOG => $conf{error_log},
+    ACCESS_LOG => $conf{access_log},
    );
 
 # now drop into sh to do the startup-scripty stuff
@@ -108,7 +112,7 @@ check_running() {
 
 _start() {
 
-  $PERL_EXEC $SERVER_STARTER -- $STARMAN &
+  $PERL_EXEC $SERVER_STARTER -- $STARMAN >>$ACCESS_LOG 2>>$ERROR_LOG &
 
   #echo "Waiting for $APP to start..."
 
