@@ -146,7 +146,7 @@ _start() {
 }
 
 start() {
-    log_daemon_msg "Starting $APP";
+    log_daemon_msg "Starting web application" $APP;
 
     if check_running; then
         log_progress_msg "already running"
@@ -177,7 +177,7 @@ _stop() {
     fi
 }
 stop() {
-    log_daemon_msg "Stopping $APP";
+    log_daemon_msg "Stopping web application" $APP;
     _stop;
     log_end_msg $?
     return $?
@@ -185,7 +185,7 @@ stop() {
 
 reload() {
     if [ -e $PIDFILE ]; then
-       log_daemon_msg "Gracefully reloading $APP";
+        log_daemon_msg "Gracefully reloading web application " $APP;
         $PERL_EXEC $SERVER_STARTER --restart;
        log_end_msg $?;
     else
@@ -195,7 +195,7 @@ reload() {
 }
 
 restart() {
-    log_daemon_msg "Restarting $APP";
+    log_daemon_msg "Restarting web application" $APP;
 
     _stop
     _start
