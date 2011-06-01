@@ -7,7 +7,7 @@ use File::Basename;
 use File::Spec::Functions;
 use IO::File;
 
-# from Config::File
+# lifted from ye olde Config::File module
 sub read_config_file($) {
     my ($conf, $file, $fh, $line_num);
     $file = shift;
