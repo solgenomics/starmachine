@@ -122,6 +122,13 @@ the B<app_dir>, or absolute.  Default: C<extlib>.
 
 =back
 
+=head1 COPYRIGHT
+
+Copyright 2011 Robert Buels
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
 =head1 AUTHOR
 
 Robert Buels <rbuels@cpan.org>
@@ -130,11 +137,14 @@ Robert Buels <rbuels@cpan.org>
 
 use strict;
 #use warnings;
+use 5.8.0;
 use Carp;
 use FindBin '$Bin';
 use File::Basename;
 use File::Spec::Functions;
 use IO::File;
+
+our $VERSION = '0.1';
 
 # lifted from ye olde Config::File module
 sub read_config_file($) {
