@@ -48,74 +48,74 @@ is configurable in a `starmachine.conf` file.  It looks like this:
     mimosa[access_log] = /var/log/mimosa.access.log
     mimosa[error_log]  = /var/log/mimosa.error.log
 
-=head2 Available configuration settings
+=head2 Configuration file settings
 
 =over
 
-=item port
+=item myapp[port]
 
 Port the app will listen on.  Default 8080.
 
-=item user
+=item myapp[user]
 
 User that the app will run under.  Defaults to the user that runs the
 init.d script.
 
-=item group
+=item myapp[group]
 
 Group that the app will run under.  Defaults to the primary group of
 the user that runs the init.d script.
 
-=item workers
+=item myapp[workers]
 
 Number of worker processes to use.  Default 10.
 
-=item timeout
+=item myapp[timeout]
 
 todo.  Default 20.
 
-=item preload_app
+=item myapp[preload_app]
 
 Default 1.  If 1, preload the application in the parent process before
 forking workers.
 
-=item server_starter_args
+=item myapp[server_starter_args]
 
 Default empty.  String interpolated directly into the invocation of
 C<start_server> (see L<start_server>).
 
-=item starman_args
+=item myapp[starman_args]
 
 Default empty.  String interpolated directly into the invocation of
 C<starman> (see L<starman>).
 
-=item access_log
+=item myapp[access_log]
 
 Access log file.  Default C<(starmachine_root)/(app_name).access.log>.
 
-=item error_log
+=item myapp[error_log]
 
 Error log file.  Default C<(starmachine_root)/(app_name).error.log>
 
-=item app_dir
+=item myapp[app_dir]
 
 Application main directory.  Default C<(starmachine_root)/(app_name)/>.
 
-=item psgi_file
+=item myapp[psgi_file]
 
 Path (relative to app_dir, or absolute) of L<PSGI> file to use for
 starting the app.
 
-=item pid_file
+=item myapp[pid_file]
 
 PID file in which to store the PID of the L<Server::Starter> parent
 process.  Default C<(starmachine_root)/(app_name).pid>.
 
-=item status_file
+=item myapp[status_file]
 
 L<Server::Starter> status file.  Default C<(starmachine_root)/(app_name).status>.
 
-=item extlib
+=item myapp[extlib]
 
 Path to bundled dependencies (extlibs) of the app, either relative to
 the B<app_dir>, or absolute.  Default: C<extlib>.
