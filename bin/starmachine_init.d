@@ -1,4 +1,133 @@
 #!/usr/bin/env perl
+
+=head1 NAME
+
+starmachine_init.d - shared LSB init.d script for running PSGI apps with Starman
+
+=head1 DESCRIPTION
+
+A management suite for production deployments of one or more PSGI web
+apps under *nix.  Runs each app with independent libraries, using
+Starman.  Right now, the "suite" is just a flexible init.d script.
+But this might grow into a suite.  Or it may not.
+
+The init script itself depends only on core Perl 5.6, although of
+course Starman and Server::Starter, plus your application's
+dependencies, must of course be available for your app to run.  These
+can be in a L<local::lib>-compatible directory, living by default at
+`/path/to/myapp/extlib`.
+
+=head2 Most basic setup - single app
+
+    git clone git://github.com/solgenomics/starmachine.git
+    cd starmachine;
+    ln -s /path/to/myapp .;
+    sudo ln -s $PWD/starmachine_init.d /etc/init.d/myapp;
+    sudo /etc/init.d/myapp start
+
+And now /etc/init.d/myapp is a well-behaved init script that starts
+your app under Starman using /path/to/myapp/script/myapp.psgi with 10
+workers, on port 8080, putting the logs in the starmachine dir.
+
+=head1 CONFIGURATION
+
+Starmachine has very sensible defaults, but almost everything it does
+is configurable in a `starmachine.conf` file.  It looks like this:
+
+    # conf for the ambikon front-end proxy
+    ambikon_integrationserver[port] = 80
+    ambikon_integrationserver[user] = www-data
+
+    # conf for the SGN legacy app
+    sgn[port] = 8201
+    sgn[user] = sgn_web
+
+    # conf for the Mimosa aligner app
+    mimosa[port] = 8202
+    mimosa[user] = mimosa
+    mimosa[access_log] = /var/log/mimosa.access.log
+    mimosa[error_log]  = /var/log/mimosa.error.log
+
+=head2 Available configuration settings
+
+=over
+
+=item port
+
+Port the app will listen on.  Default 8080.
+
+=item user
+
+User that the app will run under.  Defaults to the user that runs the
+init.d script.
+
+=item group
+
+Group that the app will run under.  Defaults to the primary group of
+the user that runs the init.d script.
+
+=item workers
+
+Number of worker processes to use.  Default 10.
+
+=item timeout
+
+todo.  Default 20.
+
+=item preload_app
+
+Default 1.  If 1, preload the application in the parent process before
+forking workers.
+
+=item server_starter_args
+
+Default empty.  String interpolated directly into the invocation of
+C<start_server> (see L<start_server>).
+
+=item starman_args
+
+Default empty.  String interpolated directly into the invocation of
+C<starman> (see L<starman>).
+
+=item access_log
+
+Access log file.  Default C<(starmachine_root)/(app_name).access.log>.
+
+=item error_log
+
+Error log file.  Default C<(starmachine_root)/(app_name).error.log>
+
+=item app_dir
+
+Application main directory.  Default C<(starmachine_root)/(app_name)/>.
+
+=item psgi_file
+
+Path (relative to app_dir, or absolute) of L<PSGI> file to use for
+starting the app.
+
+=item pid_file
+
+PID file in which to store the PID of the L<Server::Starter> parent
+process.  Default C<(starmachine_root)/(app_name).pid>.
+
+=item status_file
+
+L<Server::Starter> status file.  Default C<(starmachine_root)/(app_name).status>.
+
+=item extlib
+
+Path to bundled dependencies (extlibs) of the app, either relative to
+the B<app_dir>, or absolute.  Default: C<extlib>.
+
+=back
+
+=head1 AUTHOR
+
+Robert Buels <rbuels@cpan.org>
+
+=cut
+
 use strict;
 #use warnings;
 use Carp;
