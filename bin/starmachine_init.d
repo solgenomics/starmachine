@@ -29,10 +29,38 @@ And now /etc/init.d/myapp is a well-behaved init script that starts
 your app under Starman using /path/to/myapp/script/myapp.psgi with 10
 workers, on port 8080, putting the logs in the starmachine dir.
 
+=cut
+
 =head1 CONFIGURATION
 
 Starmachine has very sensible defaults, but almost everything it does
-is configurable in a `starmachine.conf` file.  It looks like this:
+is configurable via its configuration file.  It searches for that
+configuration file in 3 places, and uses the first one it finds:
+
+=over
+
+=item C<STARMACHINE_CONF>
+
+  The file name stored in the C<STARMACHINE_CONF> environment
+  variable, or if that is a directory, the file
+  C<$STARMACHINE_CONF/starmachine.conf> in that directory.
+
+=item C<../starmachine.conf>
+
+Relative to the (real) path from which this script is invoked.  This
+means you can just run Starmachine out of a git checkout if you want.
+
+=item C</etc/starmachine/starmachine.conf>
+
+=over
+
+=head2 Configuration format
+
+An example configuration file for three apps
+(C<ambikon_integrationserver>, C<sgn>, and C<mimosa>), looks like
+this:
+
+    root_dir /path/to/starmachine/root
 
     # conf for the ambikon front-end proxy
     ambikon_integrationserver[port] = 80
@@ -43,12 +71,23 @@ is configurable in a `starmachine.conf` file.  It looks like this:
     sgn[user] = sgn_web
 
     # conf for the Mimosa aligner app
-    mimosa[port] = 8202
-    mimosa[user] = mimosa
+    mimosa[port]       = 8202
+    mimosa[user]       = mimosa
     mimosa[access_log] = /var/log/mimosa.access.log
     mimosa[error_log]  = /var/log/mimosa.error.log
 
-=head2 Configuration file settings
+=head2 Main configuration
+
+=over
+
+=item root_dir
+
+The directory under which each application directory is assumed to
+reside, unless otherwise specified with C<myapp[app_dir]>.
+
+=back
+
+=head2 Application configuration
 
 =over
 
@@ -191,15 +230,17 @@ sub read_config_file($) {
 # variables and params, then drop into shell script for the init.d
 # running
 
-my $starmachine_root = $ENV{STARMACHINE_ROOT} || $FindBin::RealBin;
 my ( $conf_file ) = grep -r, (
     $ENV{STARMACHINE_CONF},
-    catfile( $starmachine_root, 'starmachine.conf' ),
-    '/etc/starmachine.conf',
+    catfile( $FindBin::RealBin, updir(), 'starmachine.conf' ),
+    '/etc/starmachine/starmachine.conf',
   );
+
 my $all_conf = $conf_file ? read_config_file( $conf_file ) : {};
 
-my $app = basename $0;
+my $starmachine_root = $all_conf->{root_dir} || dirname( $conf_file );
+my $app = $ENV{STARMACHINE_APP} || basename $0;
+
 
 my %conf = (
     #defaults
