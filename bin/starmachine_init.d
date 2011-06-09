@@ -293,6 +293,12 @@ my $have_extlib = -d $extlib;
 my $start_server = eval { require IPC::Cmd; IPC::Cmd::can_run('start_server') } || `which start_server` || 'start_server';
 $ENV{SERVER_STARTER} = "$start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}";
 
+# testing hook
+if( $ENV{STARMACHINE_TESTING} ) {
+    require Data::Dumper;
+    print Dumper( \%ENV );
+    exit;
+}
 
 # now drop into sh to do the startup-scripty stuff
 open( STDIN, '<&DATA' ) or die;
