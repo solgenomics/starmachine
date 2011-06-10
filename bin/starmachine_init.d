@@ -259,6 +259,9 @@ my ( $conf_file ) = grep -r, (
     '/etc/starmachine/starmachine.conf',
   );
 
+warn "WARNING: no starmachine conf file found, using defaults for all settings.\n"
+  unless $conf_file;
+
 my $all_conf = $conf_file ? read_config_file( $conf_file ) : {};
 
 my $starmachine_root = $all_conf->{root_dir} || dirname( $conf_file );
