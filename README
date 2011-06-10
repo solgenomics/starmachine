@@ -4,21 +4,21 @@ NAME
 
 DESCRIPTION
     A management suite for production deployments of one or more PSGI web
-    apps under *nix. Runs each app with independent libraries, using
-    Starman. Right now, the "suite" is just a flexible init.d script. But
-    this might grow into a suite. Or it may not.
+    apps under *nix. Runs each app with Starman, and can use independent
+    sets of libraries (e.g. "extlib/" dirs) for each app. Right now, the
+    "suite" is just a flexible init.d script. But this might grow into a
+    suite. Or it may not.
 
     The init script itself depends only on core Perl 5.6, although of course
     Starman and Server::Starter, plus your application's dependencies, must
-    of course be available for your app to run. These can be in a
-    local::lib-compatible directory, living by default at
-    `/path/to/myapp/extlib`.
+    of course be available either in the main system or in your app's extlib
+    for your app to run (see extlib conf var below).
 
   Most basic setup - single app
         git clone git://github.com/solgenomics/starmachine.git
         cd starmachine;
         ln -s /path/to/myapp .;
-        sudo ln -s $PWD/starmachine_init.d /etc/init.d/myapp;
+        sudo ln -s $PWD/bin/starmachine_init.d /etc/init.d/myapp;
         sudo /etc/init.d/myapp start
 
     And now /etc/init.d/myapp is a well-behaved init script that starts your
@@ -27,7 +27,27 @@ DESCRIPTION
 
 CONFIGURATION
     Starmachine has very sensible defaults, but almost everything it does is
-    configurable in a `starmachine.conf` file. It looks like this:
+    configurable via its configuration file. It searches for that
+    configuration file in 3 places, and uses the first one it finds:
+
+    "STARMACHINE_CONF"
+          The file name stored in the C<STARMACHINE_CONF> environment
+          variable, or if that is a directory, the file
+          C<$STARMACHINE_CONF/starmachine.conf> in that directory.
+
+    "../starmachine.conf"
+        Relative to the (real) path from which this script is invoked. This
+        means you can just run Starmachine out of a git checkout if you
+        want.
+
+    "/etc/starmachine/starmachine.conf"
+
+  Configuration format
+    An example configuration file for three apps
+    ("ambikon_integrationserver", "sgn", and "mimosa"), looks like this:
+
+        root_dir = /path/to/starmachine/root
+        env[CATALYST_CONFIG] = /etc/starmachine
 
         # conf for the ambikon front-end proxy
         ambikon_integrationserver[port] = 80
@@ -38,64 +58,86 @@ CONFIGURATION
         sgn[user] = sgn_web
 
         # conf for the Mimosa aligner app
-        mimosa[port] = 8202
-        mimosa[user] = mimosa
+        mimosa[port]       = 8202
+        mimosa[user]       = mimosa
         mimosa[access_log] = /var/log/mimosa.access.log
         mimosa[error_log]  = /var/log/mimosa.error.log
 
-  Available configuration settings
-    port
+  Main configuration variables
+    root_dir
+        The directory under which each application directory is assumed to
+        reside, unless otherwise specified with "myapp[app_dir]". Defaults
+        to the config file's directory.
+
+    env Environment variables to set for all apps.
+
+        Example:
+
+          # set all Catalyst apps to look for their conf files in
+          # /etc/starmachine
+          env[CATALYST_CONFIG] = /etc/starmachine
+
+  Application configuration variables
+    myapp[port]
         Port the app will listen on. Default 8080.
 
-    user
+    myapp[user]
         User that the app will run under. Defaults to the user that runs the
         init.d script.
 
-    group
+    myapp[group]
         Group that the app will run under. Defaults to the primary group of
         the user that runs the init.d script.
 
-    workers
+    myapp[env]
+        Variables to set in the app's environment.
+
+        Example:
+
+          myapp[env][CATALYST_CONFIG] = /path/to/myapp.conf
+          myapp[env][FOOBAR] = baz_1
+
+    myapp[workers]
         Number of worker processes to use. Default 10.
 
-    timeout
+    myapp[timeout]
         todo. Default 20.
 
-    preload_app
+    myapp[preload_app]
         Default 1. If 1, preload the application in the parent process
         before forking workers.
 
-    server_starter_args
+    myapp[server_starter_args]
         Default empty. String interpolated directly into the invocation of
         "start_server" (see start_server).
 
-    starman_args
+    myapp[starman_args]
         Default empty. String interpolated directly into the invocation of
         "starman" (see starman).
 
-    access_log
+    myapp[access_log]
         Access log file. Default "(starmachine_root)/(app_name).access.log".
 
-    error_log
+    myapp[error_log]
         Error log file. Default "(starmachine_root)/(app_name).error.log"
 
-    app_dir
+    myapp[app_dir]
         Application main directory. Default
         "(starmachine_root)/(app_name)/".
 
-    psgi_file
+    myapp[psgi_file]
         Path (relative to app_dir, or absolute) of PSGI file to use for
         starting the app.
 
-    pid_file
+    myapp[pid_file]
         PID file in which to store the PID of the Server::Starter parent
         process. Default "(starmachine_root)/(app_name).pid".
 
-    status_file
+    myapp[status_file]
         Server::Starter status file. Default
         "(starmachine_root)/(app_name).status".
 
-    extlib
+    myapp[extlib]
         Path to bundled dependencies (extlibs) of the app, either relative
         to the app_dir, or absolute. Default: "extlib".
 
