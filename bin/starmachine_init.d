@@ -14,9 +14,9 @@ suite.  Or it may not.
 
 The init script itself depends only on core Perl 5.6, although of
 course Starman and Server::Starter, plus your application's
-dependencies, must of course be available for your app to run.  These
-can be in a L<local::lib>-compatible directory, living by default at
-`/path/to/myapp/extlib`.
+dependencies, must of course be available either in the main system or
+in your app's extlib for your app to run (see B<extlib> conf var
+below).
 
 =head2 Most basic setup - single app
 
