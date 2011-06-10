@@ -76,18 +76,19 @@ this:
     mimosa[access_log] = /var/log/mimosa.access.log
     mimosa[error_log]  = /var/log/mimosa.error.log
 
-=head2 Main configuration
+=head2 Main configuration variables
 
 =over
 
 =item root_dir
 
 The directory under which each application directory is assumed to
-reside, unless otherwise specified with C<myapp[app_dir]>.
+reside, unless otherwise specified with C<myapp[app_dir]>.  Defaults
+to the config file's directory.
 
 =back
 
-=head2 Application configuration
+=head2 Application configuration variables
 
 =over
 
