@@ -7,9 +7,10 @@ starmachine_init.d - shared LSB init.d script for running PSGI apps with Starman
 =head1 DESCRIPTION
 
 A management suite for production deployments of one or more PSGI web
-apps under *nix.  Runs each app with independent libraries, using
-Starman.  Right now, the "suite" is just a flexible init.d script.
-But this might grow into a suite.  Or it may not.
+apps under *nix.  Runs each app with Starman, and can use independent
+sets of libraries (e.g. C<extlib/> dirs) for each app.  Right now, the
+"suite" is just a flexible init.d script.  But this might grow into a
+suite.  Or it may not.
 
 The init script itself depends only on core Perl 5.6, although of
 course Starman and Server::Starter, plus your application's
