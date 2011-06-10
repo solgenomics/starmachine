@@ -107,6 +107,15 @@ init.d script.
 Group that the app will run under.  Defaults to the primary group of
 the user that runs the init.d script.
 
+=item myapp[env]
+
+Variables to set in the app's environment.
+
+Example:
+
+  myapp[env][CATALYST_CONFIG] = /path/to/myapp.conf
+  myapp[env][FOOBAR] = baz_1
+
 =item myapp[workers]
 
 Number of worker processes to use.  Default 10.
@@ -261,6 +270,7 @@ my %conf = (
     pid_file            => catfile( $starmachine_root, "$app.pid"    ),
     status_file         => catfile( $starmachine_root, "$app.status" ),
     extlib              => 'extlib',
+    env                 => {},
 
     % {$all_conf->{$app} || {} },
 );
@@ -280,6 +290,8 @@ my $have_extlib = -d $extlib;
 
 %ENV = (
     %ENV,
+    %{$conf{env}},
+
     APP  => $app,
     APPDIR   => $app_dir,
     PERL5LIB => 'lib'.($have_extlib ? ":$extlib/lib/perl5" : '').":$ENV{PERL5LIB}",
