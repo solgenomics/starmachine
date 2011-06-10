@@ -61,7 +61,8 @@ An example configuration file for three apps
 (C<ambikon_integrationserver>, C<sgn>, and C<mimosa>), looks like
 this:
 
-    root_dir /path/to/starmachine/root
+    root_dir = /path/to/starmachine/root
+    env[CATALYST_CONFIG] = /etc/starmachine
 
     # conf for the ambikon front-end proxy
     ambikon_integrationserver[port] = 80
@@ -86,6 +87,16 @@ this:
 The directory under which each application directory is assumed to
 reside, unless otherwise specified with C<myapp[app_dir]>.  Defaults
 to the config file's directory.
+
+=item env
+
+Environment variables to set for all apps.
+
+Example:
+
+  # set all Catalyst apps to look for their conf files in
+  # /etc/starmachine
+  env[CATALYST_CONFIG] = /etc/starmachine
 
 =back
 
@@ -290,7 +301,8 @@ my $have_extlib = -d $extlib;
 
 %ENV = (
     %ENV,
-    %{$conf{env}},
+    %{ $all_conf->{env} || {} },
+    %{       $conf{env} || {} },
 
     APP  => $app,
     APPDIR   => $app_dir,
