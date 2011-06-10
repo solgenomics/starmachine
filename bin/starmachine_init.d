@@ -191,7 +191,7 @@ sub read_config_file($) {
 # variables and params, then drop into shell script for the init.d
 # running
 
-my $starmachine_root = $ENV{STARMACHINE_ROOT} || $FindBin::RealBin;
+my $starmachine_root = $ENV{STARMACHINE_ROOT} || catdir( $FindBin::RealBin, updir() );
 my ( $conf_file ) = grep -r, (
     $ENV{STARMACHINE_CONF},
     catfile( $starmachine_root, 'starmachine.conf' ),
