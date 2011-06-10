@@ -53,7 +53,7 @@ means you can just run Starmachine out of a git checkout if you want.
 
 =item C</etc/starmachine/starmachine.conf>
 
-=over
+=back
 
 =head2 Configuration format
 
