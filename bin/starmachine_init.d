@@ -23,7 +23,7 @@ can be in a L<local::lib>-compatible directory, living by default at
     git clone git://github.com/solgenomics/starmachine.git
     cd starmachine;
     ln -s /path/to/myapp .;
-    sudo ln -s $PWD/starmachine_init.d /etc/init.d/myapp;
+    sudo ln -s $PWD/bin/starmachine_init.d /etc/init.d/myapp;
     sudo /etc/init.d/myapp start
 
 And now /etc/init.d/myapp is a well-behaved init script that starts
