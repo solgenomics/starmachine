@@ -254,6 +254,7 @@ sub read_config_file($) {
 
 my ( $conf_file ) = grep -r, (
     $ENV{STARMACHINE_CONF},
+    catfile( $ENV{STARMACHINE_CONF}, 'starmachine.conf' ),
     catfile( $FindBin::RealBin, updir(), 'starmachine.conf' ),
     '/etc/starmachine/starmachine.conf',
   );
