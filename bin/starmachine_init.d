@@ -306,8 +306,9 @@ my $have_extlib = -d $extlib;
 %ENV = (
     %ENV,
     %{ $all_conf->{env} || {} },
-    %{       $conf{env} || {} },
-
+    %{       $conf{env} || {} }
+    );
+%ENV = (
     APP  => $app,
     APPDIR   => $app_dir,
     PERL5LIB => 'lib'.($have_extlib ? ":$extlib/lib/perl5" : '').":$ENV{PERL5LIB}",
@@ -318,7 +319,7 @@ my $have_extlib = -d $extlib;
     STARMAN => "starman --user $conf{user} --group $conf{group} --workers $conf{workers} --timeout $conf{timeout} --access-log $conf{access_log} $conf{preload_app} $conf{starman_args} $psgi_file",
     ERROR_LOG => $conf{error_log},
     ACCESS_LOG => $conf{access_log},
-   );
+    );
 
 my $start_server = eval { require IPC::Cmd; IPC::Cmd::can_run('start_server') } || `which start_server` || 'start_server';
 $ENV{SERVER_STARTER} = "$start_server --pid-file=$pid_file --port=$conf{port} --status-file=$status_file $conf{server_starter_args}";
