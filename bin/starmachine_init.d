@@ -346,6 +346,8 @@ check_running() {
 }
 
 _start() {
+  #Set maximum files that process can open to 500000
+  ulimit -n 500000
 
   $PERL_EXEC $SERVER_STARTER -- $STARMAN >>$ACCESS_LOG 2>>$ERROR_LOG &
 
