@@ -1,5 +1,16 @@
 #!/usr/bin/env perl
 
+### BEGIN INIT INFO
+# Provides:          starmachine startup
+# Required-Start:    
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable linked starmachine site
+### END INIT INFO
+
+
 =head1 NAME
 
 starmachine_init.d - shared LSB init.d script for running PSGI apps with Starman
